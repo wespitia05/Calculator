@@ -1,7 +1,13 @@
 const display = document.getElementById("display");
 
 function appendToDisplay(input) {
-    display.value += input;
+    if (input === "%") {
+        if (display.value !== "" && !display.value.endsWith("%")) {
+            display.value += "%";
+        }
+    } else {
+        display.value += input;
+    }
 }
 
 function clearDisplay() {
@@ -10,10 +16,17 @@ function clearDisplay() {
 
 function calculate() {
     try {
-        display.value = eval(display.value);
-    }
-    catch(error) {
-        display.value = "Error"
+        let expression = display.value;
+
+        expression = expression.replace(/(\d+\.?\d*)%/g, "($1/100)");
+
+        expression = expression.replace(/(\d+\.?\d*)\s*([\+\-\*\/])\s*(\(\d+\.?\d*\/100\))/g, (match, base, operator, percentValue) => {
+            return `${base} ${operator} (${base} * ${percentValue})`;
+        });
+
+        display.value = eval(expression);
+    } catch (error) {
+        display.value = "Error";
     }
 }
 
